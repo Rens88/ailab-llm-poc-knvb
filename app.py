@@ -92,7 +92,7 @@ def main() -> None:
         st.info("Set OPENAI_API_KEY or .streamlit/secrets.toml to enable the model call. The profile and prompt preview still run locally.")
 
     with st.expander("Table preview"):
-        st.dataframe(frame.head(250), use_container_width=True)
+        st.dataframe(frame.head(250), width='stretch')
 
 
 def _load_table(source_mode: str):
@@ -159,16 +159,16 @@ def _render_profile(profile) -> None:
             }
         ),
         hide_index=True,
-        use_container_width=True,
+        width='stretch',
     )
 
     col_a, col_b = st.columns(2)
     with col_a:
         st.subheader("Event Mix")
-        st.dataframe(profile.top_events, hide_index=True, use_container_width=True)
+        st.dataframe(profile.top_events, hide_index=True, width='stretch')
     with col_b:
         st.subheader("Sub-Events")
-        st.dataframe(profile.top_sub_events, hide_index=True, use_container_width=True)
+        st.dataframe(profile.top_sub_events, hide_index=True, width='stretch')
 
 
 def _resolve_api_key() -> tuple[str | None, str | None]:
