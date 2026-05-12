@@ -119,6 +119,9 @@ def _wyscout_payload_to_frame(payload: dict[str, Any]) -> tuple[pd.DataFrame, di
         tag_ids = _extract_tag_ids(event.get("tags"))
         team_id = event.get("teamId")
         player_id = event.get("playerId")
+        event_name = event.get("eventName")
+        sub_event_name = event.get("subEventName")
+        is_shot = str(event_name).lower() == "shot" or str(sub_event_name).lower() == "shot"
         start_position = _position(event.get("positions"), 0)
         end_position = _position(event.get("positions"), 1)
 
@@ -132,8 +135,8 @@ def _wyscout_payload_to_frame(payload: dict[str, Any]) -> tuple[pd.DataFrame, di
                 "team_name": teams.get(str(team_id), str(team_id)),
                 "player_id": player_id,
                 "player_name": players.get(str(player_id), str(player_id)),
-                "event_name": event.get("eventName"),
-                "sub_event_name": event.get("subEventName"),
+                "event_name": event_name,
+                "sub_event_name": sub_event_name,
                 "event_type_id": event.get("eventId"),
                 "sub_event_type_id": event.get("subEventId"),
                 "start_x": start_position.get("x"),
@@ -143,7 +146,7 @@ def _wyscout_payload_to_frame(payload: dict[str, Any]) -> tuple[pd.DataFrame, di
                 "tag_ids": "|".join(str(tag_id) for tag_id in tag_ids),
                 "accurate": 1801 in tag_ids,
                 "not_accurate": 1802 in tag_ids,
-                "goal": 101 in tag_ids,
+                "goal": is_shot and 101 in tag_ids,
                 "assist": 301 in tag_ids,
                 "key_pass": 302 in tag_ids,
             }
@@ -257,4 +260,3 @@ def _stringify_nested_values(frame: pd.DataFrame) -> pd.DataFrame:
 
 def _normalize_name(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "", name.lower())
-

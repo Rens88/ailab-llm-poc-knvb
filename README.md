@@ -1,6 +1,6 @@
 # AI Lab LLM Tabular Data Demo
 
-This repository demonstrates a Streamlit app where data engineers can let an LLM inspect tabular football event data without handing it an entire raw dataset. The app loads a CSV or JSON table, builds an auditable team-level profile, and asks OpenAI to characterize a selected team's playing style from that profile. Optional text notes can be added as unstructured context.
+This repository demonstrates a Streamlit app where data engineers can let an LLM inspect tabular football event data without handing it an entire raw dataset. The app loads CSV or JSON event tables, builds auditable team-level profiles, and asks OpenAI to characterize a selected team's playing style. Optional text notes can be added as unstructured context.
 
 ## Setup
 
@@ -37,15 +37,22 @@ cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 
 Then edit `.streamlit/secrets.toml`. That file is ignored by git.
 
+## App Pages
+
+- `LLM Match Characterization`: analyze one selected match, review home/away score, shots, shots on target, pass completion, corners, fouls, and goal scorers, then ask the LLM for a characterization.
+- `LLM MULTI-match Characterization`: load a collection of match files, select a team, include or exclude specific matches with checkboxes, review each match outcome, then ask the LLM for a multi-match characterization.
+
+Both pages include a `Steer` field for generating a second characterization with a specific emphasis or clarification.
+
 ## Sample Data
 
-Fetch the included public Wyscout sample:
+Fetch the included public Wyscout samples:
 
 ```bash
 python scripts/fetch_sample_data.py
 ```
 
-The script downloads one processed Wyscout match from `koenvo/wyscout-soccer-match-event-dataset`, stores the original JSON under `data/raw/`, and writes app-ready CSV and JSON tables under `data/sample/`.
+The script downloads seven processed Manchester City matches from `koenvo/wyscout-soccer-match-event-dataset`. It keeps one original nested Wyscout JSON under `data/raw/`, writes individual app-ready match CSV files under `data/sample/matches/`, and writes single-match plus multi-match CSV/JSON examples under `data/sample/`.
 
 ## Run
 
