@@ -37,17 +37,27 @@ def main() -> None:
     _install_styles()
     _render_main_brand()
 
-    api_key, key_source = _resolve_api_key()
+    fallback_key, fallback_source = _resolve_api_key()
 
     with st.sidebar:
         st.header("Navigation")
         page = st.radio("Page", PAGES, label_visibility="collapsed")
 
         st.header("OpenAI")
+        pasted_key = st.text_input(
+            "OpenAI API key",
+            type="password",
+            placeholder="sk-...",
+            help="Paste your key here. It stays in this browser session only and is never written to disk or git.",
+        )
+        if pasted_key.strip():
+            api_key, key_source = pasted_key.strip(), "the key field"
+        else:
+            api_key, key_source = fallback_key, fallback_source
         if api_key:
             st.success(f"Key loaded from {key_source}.")
         else:
-            st.warning("No API key found.")
+            st.warning("Paste your OpenAI API key above to enable model calls.")
         model = st.text_input("Model", value=_resolve_model())
         _render_brand_footer()
 
@@ -117,7 +127,7 @@ def _page_single_match(api_key: str | None, model: str) -> None:
     )
 
     with st.expander("Table preview"):
-        st.dataframe(match_frame.head(250), width='stretch')
+        st.dataframe(match_frame.head(250), use_container_width=True)
 
 
 def _page_multi_match(api_key: str | None, model: str) -> None:
@@ -169,7 +179,7 @@ def _page_multi_match(api_key: str | None, model: str) -> None:
         },
         disabled=[column for column in outcomes.columns if column != "include"],
         hide_index=True,
-        width='stretch',
+        use_container_width=True,
         key=f"multi_match_selector_{selected_team}",
     )
     included = edited_outcomes[edited_outcomes["include"]]
@@ -208,7 +218,7 @@ def _page_multi_match(api_key: str | None, model: str) -> None:
     )
 
     with st.expander("Combined table preview"):
-        st.dataframe(selected_frame.head(500), width='stretch')
+        st.dataframe(selected_frame.head(500), use_container_width=True)
 
 
 def _load_table(source_mode: str, key_prefix: str):
@@ -348,7 +358,7 @@ def _render_match_summary(summary) -> None:
                 columns={"minute": "Minute", "team_name": "Team", "player_name": "Scorer"}
             ),
             hide_index=True,
-            width='stretch',
+            use_container_width=True,
         )
     else:
         st.caption("No goals found in the event data.")
@@ -389,16 +399,16 @@ def _render_profile(profile) -> None:
             }
         ),
         hide_index=True,
-        width='stretch',
+        use_container_width=True,
     )
 
     col_a, col_b = st.columns(2)
     with col_a:
         st.subheader("Event Mix")
-        st.dataframe(profile.top_events, hide_index=True, width='stretch')
+        st.dataframe(profile.top_events, hide_index=True, use_container_width=True)
     with col_b:
         st.subheader("Sub-Events")
-        st.dataframe(profile.top_sub_events, hide_index=True, width='stretch')
+        st.dataframe(profile.top_sub_events, hide_index=True, use_container_width=True)
 
 
 def _llm_controls(
@@ -444,7 +454,7 @@ def _llm_controls(
         _run_llm(api_key, model, steered_prompt)
 
     if not api_key:
-        st.info("Set OPENAI_API_KEY or .streamlit/secrets.toml to enable model calls. The profile and prompt preview still run locally.")
+        st.info("Paste your OpenAI API key in the sidebar (or set OPENAI_API_KEY / .streamlit/secrets.toml) to enable model calls. The profile and prompt preview still run locally.")
 
 
 def _run_llm(api_key: str | None, model: str, prompt: str) -> None:
@@ -634,29 +644,44 @@ def _image_data_uri(path: Path) -> str:
     return f"data:image/png;base64,{encoded}"
 
 
+def _secrets_file_exists() -> bool:
+    """True only if a secrets.toml actually exists.
+
+    Touching st.secrets without a secrets file makes Streamlit raise/surface
+    a "No secrets files found" error, so we check the known paths first.
+    """
+    candidates = [
+        Path.home() / ".streamlit" / "secrets.toml",
+        ROOT / ".streamlit" / "secrets.toml",
+    ]
+    return any(path.exists() for path in candidates)
+
+
 def _resolve_api_key() -> tuple[str | None, str | None]:
     env_key = os.getenv("OPENAI_API_KEY")
     if env_key:
         return env_key, "OPENAI_API_KEY"
 
-    try:
-        if "OPENAI_API_KEY" in st.secrets:
-            return str(st.secrets["OPENAI_API_KEY"]), ".streamlit/secrets.toml"
-        openai_section = st.secrets.get("openai", {})
-        if isinstance(openai_section, dict) and openai_section.get("api_key"):
-            return str(openai_section["api_key"]), ".streamlit/secrets.toml"
-    except Exception:
-        pass
+    if _secrets_file_exists():
+        try:
+            if "OPENAI_API_KEY" in st.secrets:
+                return str(st.secrets["OPENAI_API_KEY"]), ".streamlit/secrets.toml"
+            openai_section = st.secrets.get("openai", {})
+            if isinstance(openai_section, dict) and openai_section.get("api_key"):
+                return str(openai_section["api_key"]), ".streamlit/secrets.toml"
+        except Exception:
+            pass
 
     return None, None
 
 
 def _resolve_model() -> str:
-    try:
-        if "OPENAI_MODEL" in st.secrets:
-            return str(st.secrets["OPENAI_MODEL"])
-    except Exception:
-        pass
+    if _secrets_file_exists():
+        try:
+            if "OPENAI_MODEL" in st.secrets:
+                return str(st.secrets["OPENAI_MODEL"])
+        except Exception:
+            pass
     return DEFAULT_MODEL
 
 

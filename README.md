@@ -22,6 +22,8 @@ pip install -r requirements.txt
 
 Create an API key in the OpenAI Platform dashboard. Keep the real key out of git.
 
+Option 0 (easiest): paste your key into the **OpenAI API key** field in the app sidebar. It stays in the browser session only and is never written to disk or git, and takes precedence over the options below.
+
 Option 1: environment variable:
 
 ```bash
