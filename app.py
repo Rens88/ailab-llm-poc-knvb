@@ -127,7 +127,7 @@ def _page_single_match(api_key: str | None, model: str) -> None:
     )
 
     with st.expander("Table preview"):
-        st.dataframe(match_frame.head(250), use_container_width=True)
+        st.dataframe(match_frame.head(250), width="stretch")
 
 
 def _page_multi_match(api_key: str | None, model: str) -> None:
@@ -179,7 +179,7 @@ def _page_multi_match(api_key: str | None, model: str) -> None:
         },
         disabled=[column for column in outcomes.columns if column != "include"],
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
         key=f"multi_match_selector_{selected_team}",
     )
     included = edited_outcomes[edited_outcomes["include"]]
@@ -218,7 +218,7 @@ def _page_multi_match(api_key: str | None, model: str) -> None:
     )
 
     with st.expander("Combined table preview"):
-        st.dataframe(selected_frame.head(500), use_container_width=True)
+        st.dataframe(selected_frame.head(500), width="stretch")
 
 
 def _load_table(source_mode: str, key_prefix: str):
@@ -358,7 +358,7 @@ def _render_match_summary(summary) -> None:
                 columns={"minute": "Minute", "team_name": "Team", "player_name": "Scorer"}
             ),
             hide_index=True,
-            use_container_width=True,
+            width="stretch",
         )
     else:
         st.caption("No goals found in the event data.")
@@ -399,16 +399,16 @@ def _render_profile(profile) -> None:
             }
         ),
         hide_index=True,
-        use_container_width=True,
+        width="stretch",
     )
 
     col_a, col_b = st.columns(2)
     with col_a:
         st.subheader("Event Mix")
-        st.dataframe(profile.top_events, hide_index=True, use_container_width=True)
+        st.dataframe(profile.top_events, hide_index=True, width="stretch")
     with col_b:
         st.subheader("Sub-Events")
-        st.dataframe(profile.top_sub_events, hide_index=True, use_container_width=True)
+        st.dataframe(profile.top_sub_events, hide_index=True, width="stretch")
 
 
 def _llm_controls(

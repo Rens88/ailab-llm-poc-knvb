@@ -1,8 +1,24 @@
-# AI Lab LLM Tabular Data Demo
+# AI Lab LLM Football Demo
 
-This repository demonstrates a Streamlit app where data engineers can let an LLM inspect tabular football event data without handing it an entire raw dataset. The app loads CSV or JSON event tables, builds auditable team-level profiles, and asks OpenAI to characterize a selected team's playing style. Optional text notes can be added as unstructured context.
+This is a small Streamlit app for trying out a language model inside a sports-data app.
 
-## Setup
+The app loads football match event data, builds a compact match or team profile, and asks an OpenAI model to describe a team's playing style. It is meant as a teaching demo for people who want to see how an app can call a language model through an API key.
+
+The app does not send the full raw table to the model. It sends a smaller text summary that you can inspect in the app before making the model call.
+
+## What You Need
+
+- Python installed on your computer.
+- An OpenAI API key.
+- Internet access when you call the model.
+
+The default model is `gpt-5-mini`.
+
+## Install
+
+Open a terminal in this project folder.
+
+On macOS or Linux:
 
 ```bash
 python -m venv .venv
@@ -18,51 +34,64 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## Credentials
+If `python` does not work on your machine, try `python3` instead.
 
-Create an API key in the OpenAI Platform dashboard. Keep the real key out of git.
-
-Option 0 (easiest): paste your key into the **OpenAI API key** field in the app sidebar. It stays in the browser session only and is never written to disk or git, and takes precedence over the options below.
-
-Option 1: environment variable:
-
-```bash
-export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
-export OPENAI_MODEL="gpt-5.4-mini"
-```
-
-Option 2: local Streamlit secrets:
-
-```bash
-cp .streamlit/secrets.toml.example .streamlit/secrets.toml
-```
-
-Then edit `.streamlit/secrets.toml`. That file is ignored by git.
-
-## App Pages
-
-- `LLM Match Characterization`: analyze one selected match, review home/away score, shots, shots on target, pass completion, corners, fouls, and goal scorers, then ask the LLM for a characterization.
-- `LLM MULTI-match Characterization`: load a collection of match files, select a team, include or exclude specific matches with checkboxes, review each match outcome, then ask the LLM for a multi-match characterization.
-
-Both pages include a `Steer` field for generating a second characterization with a specific emphasis or clarification.
-
-## Sample Data
-
-Fetch the included public Wyscout samples:
-
-```bash
-python scripts/fetch_sample_data.py
-```
-
-The script downloads seven processed Manchester City matches from `koenvo/wyscout-soccer-match-event-dataset`. It keeps one original nested Wyscout JSON under `data/raw/`, writes individual app-ready match CSV files under `data/sample/matches/`, and writes single-match plus multi-match CSV/JSON examples under `data/sample/`.
-
-## Run
+## Start The App
 
 ```bash
 streamlit run app.py
 ```
 
-The app sends a compact table profile to the OpenAI Responses API, not the full raw table. You can inspect the exact model context before calling the LLM.
+Streamlit will print a local web address, usually `http://localhost:8501`. Open that address in your browser.
+
+## Add Your API Key
+
+The easiest option is to paste your OpenAI API key into the **OpenAI API key** field in the app sidebar.
+
+This key stays in the current browser/app session. It is not written to git.
+
+If you do not add a key, you can still explore the sample data, profiles, and prompt preview. The buttons that call the model will stay disabled.
+
+## Optional: Save A Local Key
+
+If you do not want to paste your key each time, copy the local Streamlit secrets example:
+
+```bash
+cp .streamlit/secrets.toml.example .streamlit/secrets.toml
+```
+
+Then edit `.streamlit/secrets.toml` and replace `YOUR_OPENAI_API_KEY` with your real key.
+
+`.streamlit/secrets.toml` is ignored by git, so it should stay only on your machine.
+
+## Use The Demo
+
+The sidebar lets you choose between two pages:
+
+- `LLM Match Characterization`: analyze one football match.
+- `LLM MULTI-match Characterization`: analyze one team across several matches.
+
+For the quickest demo, keep the sample data selected, choose a team, inspect the automatically generated profile, then click **Ask LLM**.
+
+You can open **Model context** before calling the model to see exactly what text will be sent.
+
+## Sample Data
+
+This repository includes processed public Wyscout sample files under `data/sample/`.
+
+If the sample files are missing, fetch them with:
+
+```bash
+python scripts/fetch_sample_data.py
+```
+
+The script downloads public football event data from `koenvo/wyscout-soccer-match-event-dataset` and writes app-ready CSV/JSON files into this project.
+
+## Safety Notes
+
+- Do not commit real API keys.
+- Prefer pasting the key into the sidebar during workshops.
+- Use `.streamlit/secrets.toml` only for a local machine you control.
 
 ## Sources
 
