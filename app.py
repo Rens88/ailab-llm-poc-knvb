@@ -28,7 +28,7 @@ ROOT = Path(__file__).parent
 SAMPLE_DIR = ROOT / "data" / "sample"
 MATCH_SAMPLE_DIR = SAMPLE_DIR / "matches"
 ASSET_DIR = ROOT / "assets"
-DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-mini")
+DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
 PAGES = ["LLM Match Characterization", "LLM MULTI-match Characterization"]
 
 
