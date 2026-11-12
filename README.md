@@ -54,15 +54,15 @@ If you do not add a key, you can still explore the sample data, profiles, and pr
 
 ## Optional: Save A Local Key
 
-If you do not want to paste your key each time, copy the local Streamlit secrets example:
+If you do not want to paste your key each time, copy the example env file:
 
 ```bash
-cp .streamlit/secrets.toml.example .streamlit/secrets.toml
+cp .env.example .env
 ```
 
-Then edit `.streamlit/secrets.toml` and replace `YOUR_OPENAI_API_KEY` with your real key.
+Then edit `.env` and replace `YOUR_OPENAI_API_KEY` with your real key.
 
-`.streamlit/secrets.toml` is ignored by git, so it should stay only on your machine.
+`.env` is ignored by git, so it should stay only on your machine.
 
 ## Use The Demo
 
@@ -91,7 +91,7 @@ The script downloads public football event data from `koenvo/wyscout-soccer-matc
 
 - Do not commit real API keys.
 - Prefer pasting the key into the sidebar during workshops.
-- Use `.streamlit/secrets.toml` only for a local machine you control.
+- Use `.env` only for a local machine you control.
 
 ## Sources
 

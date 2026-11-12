@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+from dotenv import load_dotenv
 
 from football_llm_demo.data_io import (
     find_column,
@@ -25,6 +26,7 @@ from football_llm_demo.summarizer import build_team_profile
 
 
 ROOT = Path(__file__).parent
+load_dotenv(ROOT / ".env")
 SAMPLE_DIR = ROOT / "data" / "sample"
 MATCH_SAMPLE_DIR = SAMPLE_DIR / "matches"
 ASSET_DIR = ROOT / "assets"
@@ -454,7 +456,7 @@ def _llm_controls(
         _run_llm(api_key, model, steered_prompt)
 
     if not api_key:
-        st.info("Paste your OpenAI API key in the sidebar (or set OPENAI_API_KEY / .streamlit/secrets.toml) to enable model calls. The profile and prompt preview still run locally.")
+        st.info("Paste your OpenAI API key in the sidebar (or set OPENAI_API_KEY in .env) to enable model calls. The profile and prompt preview still run locally.")
 
 
 def _run_llm(api_key: str | None, model: str, prompt: str) -> None:
@@ -644,45 +646,15 @@ def _image_data_uri(path: Path) -> str:
     return f"data:image/png;base64,{encoded}"
 
 
-def _secrets_file_exists() -> bool:
-    """True only if a secrets.toml actually exists.
-
-    Touching st.secrets without a secrets file makes Streamlit raise/surface
-    a "No secrets files found" error, so we check the known paths first.
-    """
-    candidates = [
-        Path.home() / ".streamlit" / "secrets.toml",
-        ROOT / ".streamlit" / "secrets.toml",
-    ]
-    return any(path.exists() for path in candidates)
-
-
 def _resolve_api_key() -> tuple[str | None, str | None]:
     env_key = os.getenv("OPENAI_API_KEY")
     if env_key:
-        return env_key, "OPENAI_API_KEY"
-
-    if _secrets_file_exists():
-        try:
-            if "OPENAI_API_KEY" in st.secrets:
-                return str(st.secrets["OPENAI_API_KEY"]), ".streamlit/secrets.toml"
-            openai_section = st.secrets.get("openai", {})
-            if isinstance(openai_section, dict) and openai_section.get("api_key"):
-                return str(openai_section["api_key"]), ".streamlit/secrets.toml"
-        except Exception:
-            pass
-
+        return env_key, "OPENAI_API_KEY (.env / environment)"
     return None, None
 
 
 def _resolve_model() -> str:
-    if _secrets_file_exists():
-        try:
-            if "OPENAI_MODEL" in st.secrets:
-                return str(st.secrets["OPENAI_MODEL"])
-        except Exception:
-            pass
-    return DEFAULT_MODEL
+    return os.getenv("OPENAI_MODEL") or DEFAULT_MODEL
 
 
 if __name__ == "__main__":
